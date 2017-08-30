@@ -1,0 +1,7 @@
+.pdf-container {
+  text-align: center;
+  background: #FFFFFF;
+  color: #000000; }
+  .pdf-container .image img {
+    height: 400px;
+    width: 600px; }
