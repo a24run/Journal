@@ -1,4 +1,4 @@
-var app=angular.module("PdfApplication",['ngRoute','ngFileUpload']);
+var app=angular.module("PdfApplication",['ngRoute','ngFileUpload','naif.base64']);
 
 // Routes 
 // app.config(function($routeProvider) {
@@ -13,7 +13,7 @@ var app=angular.module("PdfApplication",['ngRoute','ngFileUpload']);
 
 // To Show and Hide Pages (As there is o server)
 
-app.controller('main',function($scope,Upload){
+app.controller('main',function($scope,Upload,$element){
 	// pre declarations 
 	window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 	window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
@@ -21,21 +21,40 @@ app.controller('main',function($scope,Upload){
 	if (!window.indexedDB) {
 	   window.alert("Your browser doesn't support a stable version of IndexedDB.")
 	}
-	$scope.getBase64Image=function(img) {
-    var canvas = document.createElement("canvas");
-    canvas.width = img.width;
-    canvas.height = img.height;
-    var ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0);
-    var dataURL = canvas.toDataURL("image/png");
-    return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
-}
+	// data base creation and usage 
+	var db;
+	// Let us open our database
+	var DBOpenRequest = window.indexedDB.open("Journal", 1);
 
+	// these event handlers act on the database being opened.
+	DBOpenRequest.onerror = function(event) {
+		/*note.innerHTML += '<li>Error loading database.</li>';*/
+		console.log("error in the db transaction")
+	};
+
+	DBOpenRequest.onsuccess = function(event) {
+		/*note.innerHTML += '<li>Database initialised.</li>';*/
+		console.log("Success in db transaction")
+
+		// store the result of opening the database in the db
+		// variable. This is used a lot below
+		db = DBOpenRequest.result;
+
+		// Run the displayData() function to populate the task
+		// listwith all the to-do list data already in the IDB
+		/*displayData();*/
+	};
+
+
+	$scope.Imagepreview=false;
 	$scope.submit=function(){
-		console.log("in memory home");
-		var imgData = $scope.getBase64Image($scope.bannerImage);
-		console.log(imgData);
-		console.log($scope.memory)
+		$scope.Imagepreview=true;
+		console.log("in memory home"+$scope.bannerImage);
+		var image = new Image();
+		image.src = 'data:image/png;base64,'+($scope.bannerImage).base64;
+		//document.body.appendChild(image);
+		$element.find(".preview").append(image)
+		//var imgData = $scope.getBase64Image($scope.bannerImage);
 	}
 	$scope.newsubmit=function(){
 		$scope.upload($scope.file);
@@ -47,26 +66,7 @@ app.controller('main',function($scope,Upload){
 		image.src = source;
 		document.body.appendChild(image);
 	}
-	// upload on file select 
-    $scope.upload = function (file) {
-    	var toB64Canvas = $scope.getBase64Image(file)
-        console.log("base 64 "+toB64Canvas);
-        $scope.imageviewr(toB64Canvas);
-    };
 
-    // conver the image to base 64 
-	    $scope.getBase64Image=function(img) {
-	    var canvas = document.createElement("canvas");
-	    var image= new Image(200,200);
-	    image.src=img.name;
-	    canvas.width = 400;
-	    canvas.height = 400;
-	    var ctx = canvas.getContext("2d");
-	    ctx.drawImage(image, 0, 0);
-	    var dataURL = canvas.toDataURL("image/png");
-	    return dataURL;
-	    //return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
-	}
 });
 
 
