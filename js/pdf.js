@@ -21,30 +21,66 @@ app.controller('main',function($scope,Upload,$element){
 	if (!window.indexedDB) {
 	   window.alert("Your browser doesn't support a stable version of IndexedDB.")
 	}
-	// data base creation and usage 
-	var db;
-	// Let us open our database
-	var DBOpenRequest = window.indexedDB.open("Journal", 1);
 
-	// these event handlers act on the database being opened.
-	DBOpenRequest.onerror = function(event) {
-		/*note.innerHTML += '<li>Error loading database.</li>';*/
-		console.log("error in the db transaction")
+	// db name 
+	var dbName="journal";
+	var db;
+	// data base creation and usage 
+	// Let us open our database
+	var IDBOpenDBRequest = window.indexedDB.open(dbName, 1);
+	// error 
+	IDBOpenDBRequest.onerror = function(event) {
+		console.log("error in the db transaction"+event)
 	};
 
-	DBOpenRequest.onsuccess = function(event) {
-		/*note.innerHTML += '<li>Database initialised.</li>';*/
+	// success 
+	IDBOpenDBRequest.onsuccess = function(event) {
 		console.log("Success in db transaction")
-
 		// store the result of opening the database in the db
 		// variable. This is used a lot below
-		db = DBOpenRequest.result;
-
-		// Run the displayData() function to populate the task
-		// listwith all the to-do list data already in the IDB
-		/*displayData();*/
+		db = IDBOpenDBRequest.result;
+		//example();
 	};
-
+	// On upgrade needed 
+	IDBOpenDBRequest.onupgradeneeded=function(event){
+		console.log("in onupgrade needed")
+		var db = event.target.result;
+		if(!db.objectStoreNames.contains("primaryObject"))
+		{
+			console.log("in the not clause to generate the object store ");
+			var objectStore=db.createObjectStore('primaryObject',{KeyPath:'id', autoIncrement:true});
+			objectStore.createIndex("title", "title", { unique: false });
+			objectStore.createIndex("description", "description", { unique: false });
+			objectStore.createIndex("base64Image", "base64Image", { unique: false });
+			objectStore.createIndex("date", "date", { unique: false });
+			var newData=[{"title":"example","description":"description","base64Image":"base64Image","date":"date"}];
+			objectStore.transaction.oncomplete = function(event) {
+			    // Store values in the newly created objectStore.
+			    var primaryObjectStore = db.transaction("primaryObject", "readwrite").objectStore("primaryObject");
+			    for (var i in newData) {
+			      primaryObjectStore.add(newData[i]);
+			    }
+			}
+		}
+		else{
+			console.log("in else ");
+		}	
+	}
+	// Adding Values into IndexedDb
+	$scope.addMemory=function(memoryTuple){
+		var db = IDBOpenDBRequest.result;
+		var transaction	=db.transaction(["primaryObject"], "readwrite")
+		var objectStore=transaction.objectStore("primaryObject");
+			var objectStoreRequest = objectStore.add(memoryTuple);
+			objectStoreRequest.onsuccess = function(event) {
+				console.log("data added"+memoryTuple)
+			}
+			objectStoreRequest.onerror=function(event){
+				console.log('u fucked up ');
+			}
+	}
+	// Displaying Values from IndexedDb
+	
 
 	$scope.Imagepreview=false;
 	$scope.submit=function(){
@@ -55,6 +91,8 @@ app.controller('main',function($scope,Upload,$element){
 		//document.body.appendChild(image);
 		$element.find(".preview").append(image)
 		//var imgData = $scope.getBase64Image($scope.bannerImage);
+		$scope.memory.base64Image=image.src;
+		$scope.addMemory($scope.memory);
 	}
 	$scope.newsubmit=function(){
 		$scope.upload($scope.file);
