@@ -1,7 +1,25 @@
 .pdf-container {
   text-align: center;
   background: #FFFFFF;
-  color: #000000; }
-  .pdf-container .image img {
-    height: 400px;
-    width: 600px; }
+  color: #000000;
+}
+.pdf-container .image img {
+height: 400px;
+width: 600px; 
+}
+ .title{
+	text-align: center;
+}
+.image{
+	display:block; 
+	width:auto;
+	height:300px;
+	margin:0 auto;
+}
+.description{
+	font-size: 16px;
+    font-family: inherit;
+    font-weight: 400;
+    text-align: left;
+    line-height: 1.25;
+}

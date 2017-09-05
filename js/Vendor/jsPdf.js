@@ -46,7 +46,7 @@
 
 /**
  * Creates new jsPDF document object instance.
- *
+ * @name jsPDF
  * @class
  * @param orientation One of "portrait" or "landscape" (or shortcuts "p" (Default), "l") <br />
  * Can also be an options object.
@@ -54,15 +54,16 @@
  *                    One of "pt" (points), "mm" (Default), "cm", "in"
  * @param format      One of 'pageFormats' as shown below, default: a4
  * @returns {jsPDF}
- * @name jsPDF
- * 
+ * @description
  * If the first parameter (orientation) is an object, it will be interpreted as an object of named parameters
+ * ```
  * {
- *  orientation, // see parameter
- *  unit, // see parameter
- *  format, // see parameter
- *  hotfixes // an array of hotfix strings to enable
+ *  orientation: 'p',
+ *  unit: 'mm',
+ *  format: 'a4',
+ *  hotfixes: [] // an array of hotfix strings to enable
  * }
+ * ```
  */
 var jsPDF = (function(global) {
   'use strict';
@@ -965,10 +966,10 @@ var jsPDF = (function(global) {
           style === 'B*') {
           /*
            Allow direct use of these PDF path-painting operators:
-           - f	fill using nonzero winding number rule
-           - f*	fill using even-odd rule
-           - B	fill then stroke with fill using non-zero winding number rule
-           - B*	fill then stroke with fill using even-odd rule
+           - f  fill using nonzero winding number rule
+           - f* fill using even-odd rule
+           - B  fill then stroke with fill using non-zero winding number rule
+           - B* fill then stroke with fill using even-odd rule
            */
           op = style;
         }
@@ -985,7 +986,7 @@ var jsPDF = (function(global) {
       },
       getBlob = function() {
         return new Blob([getArrayBuffer()], {
-          type: "application/pdf"
+          type: "data:application/pdf;base64"
         });
       },
       /**
@@ -1046,7 +1047,7 @@ var jsPDF = (function(global) {
         }
         // @TODO: Add different output options
       }),
-        
+
      /**
       * Used to see if a supplied hotfix was requested when the pdf instance was created.
       * @param {String} hotfixName - The name of the hotfix to check.
@@ -1472,12 +1473,12 @@ var jsPDF = (function(global) {
         }
         //curY = f2((pageHeight - (y - this._runningPageHeight)) * k);
 
-        //			if (curY < 0){
-        //				console.log('auto page break');
-        //				this.addPage();
-        //				this._runningPageHeight = y -  (activeFontSize * 1.7 / k);
-        //				curY = f2(pageHeight - activeFontSize * 1.7 /k);
-        //			}
+        //      if (curY < 0){
+        //        console.log('auto page break');
+        //        this.addPage();
+        //        this._runningPageHeight = y -  (activeFontSize * 1.7 / k);
+        //        curY = f2(pageHeight - activeFontSize * 1.7 /k);
+        //      }
 
         out(
           'BT\n/' +

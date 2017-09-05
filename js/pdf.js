@@ -40,6 +40,9 @@ app.controller('main',function($scope,Upload,$element){
 		// variable. This is used a lot below
 		db = IDBOpenDBRequest.result;
 		//example();
+		$scope.getData();
+		//$scope.deleteValue("sandwich");
+		//$scope.getAllValues();
 	};
 	// On upgrade needed 
 	IDBOpenDBRequest.onupgradeneeded=function(event){
@@ -76,23 +79,94 @@ app.controller('main',function($scope,Upload,$element){
 				console.log("data added"+memoryTuple)
 			}
 			objectStoreRequest.onerror=function(event){
-				console.log('u fucked up ');
+				console.log('Error');
 			}
 	}
-	// Displaying Values from IndexedDb
-	
+	// Displaying Values from IndexedDb with Key 
+	$scope.getData=function(){
+		var db = IDBOpenDBRequest.result;
+		var transaction	=db.transaction(["primaryObject"])
+		var objectStore=transaction.objectStore("primaryObject");
+		var objectStoreRequest = objectStore.getAll();
+		//var objectStoreRequest = objectStore.get(4)
+		/*var index=objectStore.index("title")
+		index.get("sandwich").onsuccess=function(event){
+			console.log(event.target.result);
+		}*/
+		objectStoreRequest.onsuccess = function(event) {
+			if(objectStoreRequest.result){
+				$scope.$apply(function(){
+					$scope.memorylist=objectStoreRequest.result;
+				});
+			}
+			//console.log(event.target.result)
+		}
+		objectStoreRequest.onerror=function(event){
+			console.log('Error');
+		}
+		objectStoreRequest.oncomplete=function(){
+			console.log("data loaded ")
+		}
+	}
+	// Getting all values with cursor
+	$scope.getAllValues=function(){
+		var db = IDBOpenDBRequest.result;
+		var transaction	=db.transaction(["primaryObject"])
+		var objectStore=transaction.objectStore("primaryObject");
+		var objectStoreRequest = objectStore.openCursor();
+		objectStoreRequest.onsuccess = function(event) {
+			var cursor = event.target.result;
+			//console.log(objectStoreRequest.result)
+			if (cursor) {
+				console.log(cursor.key + " is " + cursor.value);
+				cursor.continue();
+			}
+			else {
+				console.log("No more entries!");
+			}
+		}
+		objectStoreRequest.onerror=function(event){
+			console.log('Error');
+		}
+		objectStoreRequest.oncomplete=function(){
+			console.log("data loaded ")	
+		}
+	}
+	// Deleting value with value in an Index
+	$scope.deleteValue=function(key_data_to_be_deleted){
+		var db = IDBOpenDBRequest.result;
+		var transaction	=db.transaction(["primaryObject"],"readwrite")
+		var objectStore=transaction.objectStore("primaryObject");
+		objectStore.index("title").openCursor().onsuccess=function(event){
+			var cursor = event.target.result;
+			if(cursor){
+				console.log(cursor.key);
+				if(cursor.key==key_data_to_be_deleted)
+					cursor.delete();
+				cursor.continue();	
+			}
+			
+		}
+		//var objectStoreRequest = objectStore.delete();
+		console.log("sandwich deleted ");
+	}
 
 	$scope.Imagepreview=false;
 	$scope.submit=function(){
 		$scope.Imagepreview=true;
 		console.log("in memory home"+$scope.bannerImage);
 		var image = new Image();
-		image.src = 'data:image/png;base64,'+($scope.bannerImage).base64;
+		image.src = ('data:image/png;base64,'+($scope.bannerImage).base64).replace(/(\r\n|\n|\r)/gm,"");
 		//document.body.appendChild(image);
-		$element.find(".preview").append(image)
+		//$element.find(".preview").append(image)
 		//var imgData = $scope.getBase64Image($scope.bannerImage);
 		$scope.memory.base64Image=image.src;
 		$scope.addMemory($scope.memory);
+		$scope.getData();
+	}
+	$scope.deleteMemory=function(index){
+		$scope.deleteValue($scope.memorylist[index].title);
+		$scope.getData();
 	}
 	$scope.newsubmit=function(){
 		$scope.upload($scope.file);
@@ -102,9 +176,49 @@ app.controller('main',function($scope,Upload,$element){
 	$scope.imageviewr=function(source){
 		var image = new Image();
 		image.src = source;
-		document.body.appendChild(image);
+		//document.body.appendChild(image);
 	}
+	// generating a preview for pdf 
+	$scope.generateNewPdf=function(){
+		//html2canvas and jspdf
+		// html2canvas($("#previewDownload")[0], {
+		// background :'#FFFFFF',
+	 //  		onrendered: function(canvas) {
+	 //    	document.body.appendChild(canvas);
+	 //  		},
+	 //  		with:400,
+	 //  		height:$($("#previewDownload")[0]).height()+1000
+		// }).then(function(canvas){
+		// 	var doc = new jsPDF();
+		// 	doc.addHTML(canvas,function() {
+		//     	doc.save('web.pdf');
+		// 	});
+		// })
 
+		// only jspdf
+
+		// var doc = new jsPDF();
+		// var temp=$("#previewDownload")[0];
+		// doc.addHTML(temp,function() {
+	 //    	doc.save('web.pdf');
+		// });
+
+	// rasterize html canvas
+	var canv = document.createElement('canvas');
+	canv.id = 'someId';
+	var canvas = document.getElementById("someId"),
+	context = canvas.getContext('2d'),
+    html_container = $("#previewDownload")[0],
+    html = html_container.innerHTML;
+	rasterizeHTML.drawHTML(html).then(function (renderResult) {
+    context.drawImage(renderResult.image, 10, 25);
+	});
+	// var doc = new jsPDF();
+	// 	doc.addHTML(canv,function() {
+	//     	doc.save('web.pdf');
+	// 	});
+
+	}
 });
 
 
@@ -117,8 +231,6 @@ app.controller('pdf', function($scope){
 	    	doc.save('web.pdf');
 		});
 	}
-	//generatePdf();
-	//generatePdf();
 	html2canvas(document.body, {
 		background :'#FFFFFF',
   		onrendered: function(canvas) {
