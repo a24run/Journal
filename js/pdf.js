@@ -204,14 +204,30 @@ app.controller('main',function($scope,Upload,$element){
 		// });
 
 	// rasterize html canvas
-	var canv = document.createElement('canvas');
-	canv.id = 'someId';
-	var canvas = document.getElementById("someId"),
+	var height=($($("#previewDownload")[0]).height())*3;
+	var canvas = document.getElementById("canvas"),
 	context = canvas.getContext('2d'),
-    html_container = $("#previewDownload")[0],
+    html_container = $("#parentDivPreview")[0],
     html = html_container.innerHTML;
-	rasterizeHTML.drawHTML(html).then(function (renderResult) {
-    context.drawImage(renderResult.image, 10, 25);
+    context.fillStyle = 'rgba(0,0,0,0.5)';
+	context.fillRect(0,0,window.innerWidth,window.innerHeight);
+    canvas.height=height;
+    canvas.width=window.innerWidth;
+	rasterizeHTML.drawHTML(html,canvas)
+	.then(function (renderResult) {
+    	context.drawImage(renderResult.image, 0, 0);
+	}
+	, function error(e) {
+       console.log(e);
+    })
+    .then(function(){
+		var doc = new jsPDF({
+		  orientation: 'portrait',
+		  format:[canvas.height, canvas.width]
+		});
+		doc.addHTML(canvas,function() {
+		    doc.save('web.pdf');
+		});
 	});
 	// var doc = new jsPDF();
 	// 	doc.addHTML(canv,function() {

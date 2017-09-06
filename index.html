@@ -85,11 +85,13 @@
 				        	<div class="pull-right btn btn-success" ng-click="generateNewPdf()" >Download PDf</div>
 				        </div>
 				        <div class="modal-body">
-							<div id="previewDownload" style="display: block;height: 100%;">
-								<div ng-repeat="each in memorylist">
-									<div class="lead col-sm-12 title"><h3>{{each.title}}</h3></div>
-									<div class="col-sm-12"> <img class="image" src={{each.base64Image}}></div>
-									<div class="col-offset-sm-1 col-sm-10 description"><p >{{each.description}}</p></div>
+				        	<div id="parentDivPreview">
+								<div id="previewDownload" style="display: block;height: 100%;">
+									<div ng-repeat="each in memorylist">
+										<div class="lead col-sm-12 " style="text-align: center;"><h3>{{each.title}}</h3></div>
+										<div class="col-sm-12 "> <img style="display:block;width:auto;height:300px;margin:0 auto;" src={{each.base64Image}}></div>
+										<div class="col-offset-sm-1 col-sm-10" style="font-size: 16px;font-family: inherit;font-weight: 400;text-align: left;line-height: 1.25;"><p >{{each.description}}</p></div>
+									</div>
 								</div>
 							</div>
 						</div>	
@@ -99,6 +101,7 @@
 					</div>    
 				</div>
 			</div>
+			<canvas id="canvas" width="800" height="900"></canvas>
 		</div>
 	</div>
 </body>
