@@ -36,13 +36,8 @@ app.controller('main',function($scope,Upload,$element){
 	// success 
 	IDBOpenDBRequest.onsuccess = function(event) {
 		console.log("Success in db transaction")
-		// store the result of opening the database in the db
-		// variable. This is used a lot below
 		db = IDBOpenDBRequest.result;
-		//example();
 		$scope.getData();
-		//$scope.deleteValue("sandwich");
-		//$scope.getAllValues();
 	};
 	// On upgrade needed 
 	IDBOpenDBRequest.onupgradeneeded=function(event){
@@ -88,11 +83,6 @@ app.controller('main',function($scope,Upload,$element){
 		var transaction	=db.transaction(["primaryObject"])
 		var objectStore=transaction.objectStore("primaryObject");
 		var objectStoreRequest = objectStore.getAll();
-		//var objectStoreRequest = objectStore.get(4)
-		/*var index=objectStore.index("title")
-		index.get("sandwich").onsuccess=function(event){
-			console.log(event.target.result);
-		}*/
 		objectStoreRequest.onsuccess = function(event) {
 			if(objectStoreRequest.result){
 				$scope.$apply(function(){
@@ -148,7 +138,7 @@ app.controller('main',function($scope,Upload,$element){
 			
 		}
 		//var objectStoreRequest = objectStore.delete();
-		console.log("sandwich deleted ");
+		//console.log("sandwich deleted ");
 	}
 
 	$scope.Imagepreview=false;
@@ -157,9 +147,6 @@ app.controller('main',function($scope,Upload,$element){
 		console.log("in memory home"+$scope.bannerImage);
 		var image = new Image();
 		image.src = ('data:image/png;base64,'+($scope.bannerImage).base64).replace(/(\r\n|\n|\r)/gm,"");
-		//document.body.appendChild(image);
-		//$element.find(".preview").append(image)
-		//var imgData = $scope.getBase64Image($scope.bannerImage);
 		$scope.memory.base64Image=image.src;
 		$scope.addMemory($scope.memory);
 		$scope.getData();
@@ -176,35 +163,9 @@ app.controller('main',function($scope,Upload,$element){
 	$scope.imageviewr=function(source){
 		var image = new Image();
 		image.src = source;
-		//document.body.appendChild(image);
 	}
 	// generating a preview for pdf 
 	$scope.generateNewPdf=function(){
-		//html2canvas and jspdf
-		// html2canvas($("#previewDownload")[0], {
-		// background :'#FFFFFF',
-	 //  		onrendered: function(canvas) {
-	 //    	document.body.appendChild(canvas);
-	 //  		},
-	 //  		with:400,
-	 //  		height:$($("#previewDownload")[0]).height()+1000
-		// }).then(function(canvas){
-		// 	var doc = new jsPDF();
-		// 	doc.addHTML(canvas,function() {
-		//     	doc.save('web.pdf');
-		// 	});
-		// })
-
-		// only jspdf
-
-		// var doc = new jsPDF();
-		// var temp=$("#previewDownload")[0];
-		// doc.addHTML(temp,function() {
-	 //    	doc.save('web.pdf');
-		// });
-
-	// rasterize html canvas
-	// save add pade promise calls 
 		var savePromiseFunction=function(){
 			return new Promise(function(resolve, reject) {
 				doc.save('web.pdf');

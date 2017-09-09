@@ -24,5 +24,8 @@ width: 600px;
   line-height: 1.25;
 }
 .body{
-   background: #fff !important;
+  background: #fff !important;
+}
+#canvas{
+  background: #fff !important;
 }
