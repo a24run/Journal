@@ -204,36 +204,89 @@ app.controller('main',function($scope,Upload,$element){
 		// });
 
 	// rasterize html canvas
-	var height=($($("#previewDownload")[0]).height())*3;
-	var canvas = document.getElementById("canvas"),
-	context = canvas.getContext('2d'),
-    html_container = $("#parentDivPreview")[0],
-    html = html_container.innerHTML;
-    context.fillStyle = 'rgba(0,0,0,0.5)';
-	context.fillRect(0,0,window.innerWidth,window.innerHeight);
-    canvas.height=height;
-    canvas.width=window.innerWidth;
-	rasterizeHTML.drawHTML(html,canvas)
-	.then(function (renderResult) {
-    	context.drawImage(renderResult.image, 0, 0);
-	}
-	, function error(e) {
-       console.log(e);
-    })
-    .then(function(){
+	// save add pade promise calls 
+		var savePromiseFunction=function(){
+			return new Promise(function(resolve, reject) {
+				doc.save('web.pdf');
+				if(Error){
+					resolve(console.log(Error));
+				}
+				else{
+					reject(console.log("It broke"));
+				}
+			});
+		}
+		var addPagePromiseFunction=function(){
+			return new Promise(function(resolve, reject) {
+				 doc.addPage();
+				if(Error){
+					resolve(console.log(Error));
+				}
+				else{
+					reject(console.log("It broke"));
+				}
+			});
+		}
+		var arrayOfMemories=$(".row_of_images");
+		var i=0;
+		var height=($($("#previewDownload")[i]).height()*3);
+		var canvas = document.getElementById("canvas"),
+		context = canvas.getContext('2d'),
+	    html = arrayOfMemories[i].innerHTML;
+	    canvas.height=height;
 		var doc = new jsPDF({
-		  orientation: 'portrait',
-		  format:[canvas.height, canvas.width]
-		});
-		doc.addHTML(canvas,function() {
-		    doc.save('web.pdf');
-		});
-	});
-	// var doc = new jsPDF();
-	// 	doc.addHTML(canv,function() {
-	//     	doc.save('web.pdf');
-	// 	});
-
+			  orientation: 'p',
+			  //format:[canvas.height, canvas.width]
+			});
+		var continuePDFCall=function(){
+			rasterizeHTML.drawHTML(html,canvas)
+			.then(function (renderResult) {
+		    	context.drawImage(renderResult.image, 0, 0);
+			}
+			, function error(e) {
+		       console.log(e);
+		    })
+		    .then(function(){
+				doc.addHTML(canvas,function(){
+					addPagePromiseFunction()
+					.then(function(){
+						context.clearRect(0, 0, canvas.width, canvas.height);
+					})
+					.then(function(){
+						i++;
+						if(arrayOfMemories[i]!=undefined){
+							html = arrayOfMemories[i].innerHTML;
+						}						
+					})
+					.then(function(){
+						if(i==arrayOfMemories.length){
+							savePromiseFunction()
+							.then(function(){
+								var stop=3;
+								continueArrayIncrement(stop);
+								$("#canvas").hide();
+							})
+						}
+						else{
+							continueArrayIncrement(1);
+						}
+					})
+				})	    
+			});
+		}
+		var continueArrayIncrement=function(bool){
+			if(i<=arrayOfMemories.length && bool==1)
+			{
+				continuePDFCall();
+			}
+			else if(bool==2){
+				continueArrayIncrement(2)
+			}
+			else{
+				console.log("PDF generated");
+			}
+		};
+		continueArrayIncrement(1);
 	}
 });
 
